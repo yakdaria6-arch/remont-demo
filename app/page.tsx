@@ -3,14 +3,16 @@
 import { useState } from "react";
 
 const ROOM_TYPES = [
-  { label: "Косметический", pricePerSqm: 3500 },
-  { label: "Капитальный", pricePerSqm: 6500 },
-  { label: "Под ключ (евро)", pricePerSqm: 10000 },
+  { label: "Обои, покраска, полы", pricePerSqm: 3500 },
+  { label: "Замена труб, проводки, полов", pricePerSqm: 6500 },
+  { label: "Евроремонт под ключ", pricePerSqm: 10000 },
   { label: "Дизайнерский", pricePerSqm: 16000 },
 ];
 
 export default function Home() {
-  const [area, setArea] = useState(50);
+  const [length, setLength] = useState("");
+  const [width, setWidth] = useState("");
+  const [height, setHeight] = useState("");
   const [typeIndex, setTypeIndex] = useState(1);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -18,6 +20,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const area = parseFloat(length) * parseFloat(width) || 0;
   const price = area * ROOM_TYPES[typeIndex].pricePerSqm;
   const priceMin = Math.round(price * 0.9 / 1000) * 1000;
   const priceMax = Math.round(price * 1.2 / 1000) * 1000;
@@ -34,7 +37,10 @@ export default function Home() {
         body: JSON.stringify({
           name,
           phone,
-          area,
+          area: area.toFixed(1),
+          length,
+          width,
+          height,
           type: ROOM_TYPES[typeIndex].label,
           priceMin,
           priceMax,
@@ -115,32 +121,49 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Площадь */}
+            {/* Размеры комнаты */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Площадь квартиры: <span className="text-orange-500">{area} м²</span>
-              </label>
-              <input
-                type="range"
-                min={20}
-                max={200}
-                value={area}
-                onChange={(e) => setArea(Number(e.target.value))}
-                className="w-full accent-orange-500"
-              />
-              <div className="flex justify-between text-xs text-gray-400 mt-1">
-                <span>20 м²</span>
-                <span>200 м²</span>
+              <label className="block text-sm font-semibold text-gray-700 mb-3">Размеры комнаты (в метрах)</label>
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { label: "Длина", value: length, set: setLength },
+                  { label: "Ширина", value: width, set: setWidth },
+                  { label: "Высота", value: height, set: setHeight },
+                ].map((field) => (
+                  <div key={field.label}>
+                    <p className="text-xs text-gray-400 mb-1 text-center">{field.label}</p>
+                    <input
+                      type="number"
+                      min={1}
+                      max={50}
+                      step={0.1}
+                      placeholder="0"
+                      value={field.value}
+                      onChange={(e) => field.set(e.target.value)}
+                      className="w-full border border-gray-200 rounded-xl px-3 py-3 text-center text-lg font-bold focus:outline-none focus:border-orange-400"
+                    />
+                    <p className="text-xs text-gray-400 mt-1 text-center">м</p>
+                  </div>
+                ))}
               </div>
+              {area > 0 && (
+                <p className="text-xs text-gray-400 mt-2 text-center">Площадь: {area.toFixed(1)} м²</p>
+              )}
             </div>
 
             {/* Результат */}
-            <div className="bg-orange-50 rounded-xl p-5 text-center">
-              <p className="text-sm text-orange-700 font-medium mb-1">Ориентировочная стоимость</p>
-              <p className="text-3xl font-extrabold text-orange-600">
-                {priceMin.toLocaleString("ru-RU")} – {priceMax.toLocaleString("ru-RU")} ₽
-              </p>
-              <p className="text-xs text-orange-400 mt-1">Точная цена — после замера мастера (бесплатно)</p>
+            <div className={`rounded-xl p-5 text-center transition ${area > 0 ? "bg-orange-50" : "bg-gray-100"}`}>
+              <p className="text-sm font-medium mb-1 text-gray-500">Ориентировочная стоимость</p>
+              {area > 0 ? (
+                <>
+                  <p className="text-3xl font-extrabold text-orange-600">
+                    {priceMin.toLocaleString("ru-RU")} – {priceMax.toLocaleString("ru-RU")} ₽
+                  </p>
+                  <p className="text-xs text-orange-400 mt-1">Точная цена — после замера мастера (бесплатно)</p>
+                </>
+              ) : (
+                <p className="text-gray-400">Введите размеры комнаты выше</p>
+              )}
             </div>
 
             {/* Форма */}
