@@ -6,36 +6,18 @@ type RoomType = { label: string; pricePerSqm: number };
 type Stat = { num: string; label: string };
 type Review = { name: string; city: string; text: string; rating: number; project: string };
 type PortfolioItem = { title: string; area: string; type: string; days: string; before: string; after: string };
+type Step = { step: string; title: string; desc: string };
+type FaqItem = { q: string; a: string };
 type SiteData = {
   company: { name: string; phone: string; city: string };
   stats: Stat[];
   roomTypes: RoomType[];
   portfolio: PortfolioItem[];
+  steps: Step[];
+  faq: FaqItem[];
   reviews: Review[];
 };
 
-const FAQ = [
-  {
-    q: "Почему цена фиксированная? Это реально?",
-    a: "Да. Мы делаем детальный замер и прописываем все работы в смете до копейки. Если что-то упустили при замере — это наша ошибка, клиент не доплачивает.",
-  },
-  {
-    q: "Что если вы не уложитесь в срок?",
-    a: "В договоре прописана неустойка — 0,5% от суммы за каждый день просрочки. Это дисциплинирует лучше любых обещаний.",
-  },
-  {
-    q: "Можно ли купить материалы самому?",
-    a: "Да. Вы можете купить материалы сами — тогда мы работаем только за услуги. Или доверить закупку нам — у нас есть скидки у поставщиков до 15%.",
-  },
-  {
-    q: "Как проходит оплата?",
-    a: "Поэтапно: 30% аванс, 40% после черновых работ, 30% при сдаче объекта. Никаких полных предоплат.",
-  },
-  {
-    q: "Какая гарантия на работы?",
-    a: "2 года на все виды работ. Если что-то отвалится — приедем и переделаем бесплатно.",
-  },
-];
 
 export default function Home() {
   const [siteData, setSiteData] = useState<SiteData | null>(null);
@@ -60,7 +42,7 @@ export default function Home() {
 
   if (!siteData) return null;
 
-  const { company, stats, roomTypes, portfolio, reviews } = siteData;
+  const { company, stats, roomTypes, portfolio, steps, faq, reviews } = siteData;
   const area = parseFloat(length) * parseFloat(width) || 0;
   const price = area * roomTypes[typeIndex].pricePerSqm;
   const priceMin = Math.round(price * 0.9 / 1000) * 1000;
@@ -286,12 +268,7 @@ export default function Home() {
         <div className="max-w-2xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 text-center mb-8 md:mb-10">Как мы работаем</h2>
           <div className="space-y-6">
-            {[
-              { step: "01", title: "Бесплатный замер", desc: "Выезжаем в удобное время, замеряем и составляем детальную смету — без скрытых позиций" },
-              { step: "02", title: "Договор с фиксированной ценой", desc: "Прописываем цену, сроки и штрафы за просрочку. Платите поэтапно — 30/40/30%" },
-              { step: "03", title: "Ремонт с фотоотчётами", desc: "Работаем по технологии, убираем мусор ежедневно. Фото в WhatsApp каждый день" },
-              { step: "04", title: "Сдача и гарантия", desc: "Принимаете работу по акту. Гарантия 2 года — если что-то не так, приедем и исправим" },
-            ].map((item) => (
+            {steps.map((item) => (
               <div key={item.step} className="flex gap-6 items-start">
                 <span className="text-4xl font-extrabold text-amber-300 w-14 shrink-0 leading-none">{item.step}</span>
                 <div>
@@ -309,7 +286,7 @@ export default function Home() {
         <div className="max-w-2xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 text-center mb-8 md:mb-10">Частые вопросы</h2>
           <div className="space-y-3">
-            {FAQ.map((item, i) => (
+            {faq.map((item, i) => (
               <div key={i} className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
                 <button onClick={() => setOpenFaq(openFaq === i ? null : i)}
                   className="w-full text-left px-6 py-5 flex justify-between items-center gap-4">

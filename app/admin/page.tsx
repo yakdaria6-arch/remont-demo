@@ -66,11 +66,15 @@ type RoomType = { label: string; pricePerSqm: number };
 type Stat = { num: string; label: string };
 type Review = { name: string; city: string; text: string; rating: number; project: string };
 type PortfolioItem = { title: string; area: string; type: string; days: string; before: string; after: string };
+type Step = { step: string; title: string; desc: string };
+type FaqItem = { q: string; a: string };
 type SiteData = {
   company: { name: string; phone: string; city: string };
   stats: Stat[];
   roomTypes: RoomType[];
   portfolio: PortfolioItem[];
+  steps: Step[];
+  faq: FaqItem[];
   reviews: Review[];
 };
 
@@ -81,7 +85,7 @@ export default function AdminPage() {
   const [data, setData] = useState<SiteData | null>(null);
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
-  const [activeTab, setActiveTab] = useState<"company" | "stats" | "prices" | "portfolio" | "reviews">("company");
+  const [activeTab, setActiveTab] = useState<"company" | "stats" | "prices" | "portfolio" | "steps" | "faq" | "reviews">("company");
   const [showPreview, setShowPreview] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
@@ -152,6 +156,32 @@ export default function AdminPage() {
     });
   }
 
+  function updateStep(i: number, field: string, value: string) {
+    setData(d => {
+      if (!d) return d;
+      const steps = [...d.steps];
+      steps[i] = { ...steps[i], [field]: value };
+      return { ...d, steps };
+    });
+  }
+
+  function updateFaq(i: number, field: string, value: string) {
+    setData(d => {
+      if (!d) return d;
+      const faq = [...d.faq];
+      faq[i] = { ...faq[i], [field]: value };
+      return { ...d, faq };
+    });
+  }
+
+  function addFaq() {
+    setData(d => d ? { ...d, faq: [...d.faq, { q: "", a: "" }] } : d);
+  }
+
+  function removeFaq(i: number) {
+    setData(d => d ? { ...d, faq: d.faq.filter((_, idx) => idx !== i) } : d);
+  }
+
   function addPortfolio() {
     setData(d => d ? { ...d, portfolio: [...d.portfolio, { title: "", area: "", type: "", days: "", before: "", after: "" }] } : d);
   }
@@ -203,6 +233,8 @@ export default function AdminPage() {
     { id: "stats", label: "Цифры" },
     { id: "prices", label: "Цены" },
     { id: "portfolio", label: "Портфолио" },
+    { id: "steps", label: "Этапы" },
+    { id: "faq", label: "FAQ" },
     { id: "reviews", label: "Отзывы" },
   ] as const;
 
@@ -391,6 +423,57 @@ export default function AdminPage() {
                     onChange={url => updatePortfolio(i, "before", url)} />
                   <PhotoUpload label="Фото ПОСЛЕ" value={item.after} password={password}
                     onChange={url => updatePortfolio(i, "after", url)} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Этапы */}
+        {activeTab === "steps" && (
+          <div className="space-y-6">
+            <h2 className="text-xl font-extrabold text-gray-900">Этапы работы</h2>
+            <p className="text-gray-500 text-sm">Блок "Как мы работаем" на сайте</p>
+            <div className="space-y-4">
+              {data.steps.map((item, i) => (
+                <div key={i} className="bg-white rounded-2xl shadow-sm p-6 space-y-3">
+                  <div className="flex gap-3 items-center">
+                    <span className="text-2xl font-extrabold text-amber-400 w-10 shrink-0">{item.step}</span>
+                    <input type="text" value={item.title} onChange={e => updateStep(i, "title", e.target.value)}
+                      placeholder="Название этапа"
+                      className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm font-semibold focus:outline-none focus:border-amber-400" />
+                  </div>
+                  <textarea value={item.desc} onChange={e => updateStep(i, "desc", e.target.value)} rows={2}
+                    placeholder="Описание этапа"
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-amber-400 resize-none" />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* FAQ */}
+        {activeTab === "faq" && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-extrabold text-gray-900">Частые вопросы</h2>
+              <button onClick={addFaq} className="bg-gray-900 hover:bg-gray-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition">
+                + Добавить
+              </button>
+            </div>
+            <div className="space-y-4">
+              {data.faq.map((item, i) => (
+                <div key={i} className="bg-white rounded-2xl shadow-sm p-6 space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm font-bold text-gray-700">Вопрос #{i + 1}</span>
+                    <button onClick={() => removeFaq(i)} className="text-red-400 hover:text-red-600 text-sm transition">Удалить</button>
+                  </div>
+                  <input type="text" value={item.q} onChange={e => updateFaq(i, "q", e.target.value)}
+                    placeholder="Вопрос"
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm font-semibold focus:outline-none focus:border-amber-400" />
+                  <textarea value={item.a} onChange={e => updateFaq(i, "a", e.target.value)} rows={3}
+                    placeholder="Ответ"
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-amber-400 resize-none" />
                 </div>
               ))}
             </div>
